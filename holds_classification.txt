@@ -1,0 +1,15 @@
+A, B, C, D, E, F, G, H, I, J, K
+18, crimp, pinch, edge, jug, crimp, small crimp, pocket, edge, crimp, edge, small crimp
+17, small crimp, crimp, pinch, small crimp, edge, crimp, pinch, small crimp, edge, crimp, crimp
+16, pinch, crimp, small crimp, small crimp, edge, crimp, edge, jug, crimp, small crimp, crimp
+15, jug, small crimp, small pinch, edge, crimp, pinch, crimp, pinch, edge, jug, crimp
+14, jug, crimp, pinch, small pinch, small crimp, pinch, crimp, small crimp, small crimp, small pinch, small crimp
+13, small crimp, crimp, edge, small crimp, small crimp, crimp, pinch, small pinch, edge, crimp, small crimp
+12, small crimp, pinch, crimp, pinch, small pinch, pinch, edge, jug, edge, crimp, small crimp
+11, pinch, pinch, crimp, crimp, pinch, crimp, crimp, small crimp, crimp, pinch, small crimp
+10, crimp, small crimp, crimp, edge, edge, crimp, jug, crimp, small crimp, crimp
+9, pocket, crimp, crimp, pinch, crimp, crimp, edge, pinch, crimp, edge, pinch
+8, pocket, edge, pinch, small crimp, small crimp, pinch, small crimp, small crimp, jug, crimp, crimp
+7, crimp, crimp, small crimp, small crimp, pinch, crimp, small crimp, small crimp, pocket, small crimp, crimp
+6, crimp, crimp, small pinch, small crimp, pinch, crimp, small crimp, crimp, small crimp, crimp, edge
+5, jug, jug, crimp, pinch, small crimp, crimp, dege, pinch, small crimp, pinch, small crimp
