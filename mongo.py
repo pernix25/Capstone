@@ -43,7 +43,7 @@ collection = db["moonBoard"]
 
 #query = collection.find_one({"filePath": "12345"})
 
-populate_db()
+#populate_db()
 
 all_collections = db.list_collection_names()
 
