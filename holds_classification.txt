@@ -7,7 +7,7 @@ A, B, C, D, E, F, G, H, I, J, K
 13, small crimp, crimp, edge, small crimp, small crimp, crimp, pinch, small pinch, edge, crimp, small crimp
 12, small crimp, pinch, crimp, pinch, small pinch, pinch, edge, jug, edge, crimp, small crimp
 11, pinch, pinch, crimp, crimp, pinch, crimp, crimp, small crimp, crimp, pinch, small crimp
-10, crimp, small crimp, crimp, edge, edge, crimp, jug, crimp, small crimp, crimp
+10, crimp, small crimp, crimp, edge, edge, edge, crimp, jug, crimp, small crimp, crimp
 9, pocket, crimp, crimp, pinch, crimp, crimp, edge, pinch, crimp, edge, pinch
 8, pocket, edge, pinch, small crimp, small crimp, pinch, small crimp, small crimp, jug, crimp, crimp
 7, crimp, crimp, small crimp, small crimp, pinch, crimp, small crimp, small crimp, pocket, small crimp, crimp
