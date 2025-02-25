@@ -11,7 +11,11 @@ collection = db["moonBoard"]
 #collection.insert_one({'filePath': '12345', 'holdType': 'crimp', 'photoNumber': 1})
 
 #query = collection.find_one({"filePath": "12345"})
+"""
+query_all = collection.find()
+"""
 
-query = collection.find()
+start_holds = collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': 'crimp'}]})
 
-print(query[0]['img_coords'])
+for row in start_holds:
+    print(row)
