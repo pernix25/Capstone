@@ -31,7 +31,14 @@ def populate_db():
         for c_index, hold in enumerate(row):
             pos = (r_index, c_index)
 
-            collection.insert_one({'row': r_index, 'col': c_index, 'hold_type': hold.strip(), 'img_coords': (hold_coords[17 - r_index][c_index])})
+            collection.insert_one({'row': 18 - r_index, 'col': c_index, 'hold_type': hold.strip(), 'img_coords': (hold_coords[r_index][c_index])})
+    
+    extra_rows = hold_coords[-4:]
+    start_row = 4
+    for row in extra_rows:
+        for index in range(len(row)):
+            collection.insert_one({'row': start_row, 'col': index, 'img_coords': (hold_coords[-1*(start_row)][index])})
+        start_row -= 1
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
@@ -47,6 +54,10 @@ collection = db["moonBoard"]
 
 #populate_db()
 
+query_all = collection.find()
+for item in query_all:
+    print(item)
+
 all_collections = db.list_collection_names()
 
-print(all_collections)
+#print(all_collections)
