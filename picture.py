@@ -40,9 +40,9 @@ radius = 125
 for coord in hold_coords:
     if radius_count % 66 == 0:
         radius -= 25
-    image_with_circle = draw(image_with_circle, coord, radius)
+    #image_with_circle = draw(image_with_circle, coord, radius)
     radius_count += 1
-
+"""
 # Display the image
 cv2.imshow("Image with Circle", image_with_circle)
 cv2.waitKey(0)
@@ -50,3 +50,4 @@ cv2.destroyAllWindows()
 
 # Save the modified image (optional)
 cv2.imwrite("labeled.jpg", image_with_circle)
+"""

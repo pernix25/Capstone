@@ -13,9 +13,10 @@ collection = db["moonBoard"]
 #query = collection.find_one({"filePath": "12345"})
 """
 query_all = collection.find()
+for item in query_all:
+    print(item)
 """
+#start_holds = collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': 'crimp'}]})
 
-start_holds = collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': 'crimp'}]})
-
-for row in start_holds:
-    print(row)
+#for row in start_holds:
+    #print(row)

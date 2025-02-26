@@ -31,7 +31,7 @@ def populate_db():
         for c_index, hold in enumerate(row):
             pos = (r_index, c_index)
 
-            collection.insert_one({'row': r_index, 'col': c_index, 'hold_type': hold, 'img_coords': (hold_coords[r_index][c_index])})
+            collection.insert_one({'row': r_index, 'col': c_index, 'hold_type': hold, 'img_coords': (hold_coords[17 - r_index][c_index])})
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
@@ -42,6 +42,8 @@ collection = db["moonBoard"]
 #collection.insert_one({'filePath': '12345', 'holdType': 'crimp', 'photoNumber': 1})
 
 #query = collection.find_one({"filePath": "12345"})
+
+#delete_all_query = collection.delete_many({})
 
 #populate_db()
 
