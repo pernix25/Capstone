@@ -1,12 +1,14 @@
-import os
+import pymongo
+import cv2
+from picture import draw
 
-folder_path = "/Volumes/phoneUSB/Capstone"
+# row 13-18, radius = 100
+# row 7-12, radius = 75
+# row 1-6, radius = 50
 
-try:
-    # List all items in the folder
-    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-    print(f"Number of files: {len(files)}")
-except FileNotFoundError:
-    print("The folder does not exist.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+# Database stuff
+
+# keys: row, col, hold_type, img_coords
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client["Capstone"]
+collection = db["moonBoard"]
