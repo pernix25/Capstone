@@ -21,12 +21,11 @@ hold_coords = [
     [754, 3248], [897, 3251], [1042, 3246], [1183, 3246], [1325, 3250], [1472, 3243], [1625, 3244], [1756, 3249], [1902, 3240], [2047, 3240], [2186, 3240]
 ]
 
-def draw(image, coord, radius):
+def draw(image, coord, radius, color=(255,0,0)):
     # Define circle parameters
     center_coordinates = (coord[0], coord[1])  # (x, y) coordinates of the center
     radius = radius                 # Radius of the circle
-    color = (0, 255, 0)              # Color in BGR format (Green in this case)
-    thickness = 5                    # Thickness of the circle outline (-1 for filled)
+    thickness = 7                    # Thickness of the circle outline (-1 for filled)
 
     # Draw the circle
     return cv2.circle(image, center_coordinates, radius, color, thickness)
