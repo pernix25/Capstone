@@ -28,15 +28,7 @@ def query():
     for item in data:
         print(item)
 
-def create_route(hold_type, num_routes=1):
-    def get_radius(row_num):
-        if row_num >= 13:
-            return 100
-        elif row_num >= 7:
-            return 75
-        else:
-            return 50
-        
+def create_route(hold_type, num_routes=1):   
     def within_reach(curr_row_col, potential_row_col, ape_index):
         curr_row = curr_row_col[0]
         curr_col = curr_row_col[1]
@@ -65,14 +57,12 @@ def create_route(hold_type, num_routes=1):
 
         return (False, False)
     
+    route = []
+
     possible_starting_holds = list(collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': f'{hold_type}'}]})) 
     random_start = r.choice(possible_starting_holds)
     start_row = random_start['row']
-    start_radius = get_radius(start_row)
-    start_coords = list(random_start['img_coords'])
-
-    image_with_circle = cv2.imread("moonBoard.jpg")
-    image_with_circle = draw(image_with_circle, start_coords, start_radius, (0,255,0))
+    route.append(random_start)
 
     curr_row = start_row
     curr_col = random_start['col']
@@ -82,9 +72,8 @@ def create_route(hold_type, num_routes=1):
     while (curr_row <= 17):
         next_hold, curr_row = pick_next_hold(hold_type, curr_row, curr_col, APE)
         
-        if (next_hold):
-            hold_coords = list(next_hold['img_coords'])
-            image_with_circle = draw(image_with_circle, hold_coords, get_radius(next_hold['row']))
+        if (next_hold):            
+            route.append(next_hold)
             
             curr_row = next_hold['row']
             curr_col = next_hold['col']
@@ -94,7 +83,6 @@ def create_route(hold_type, num_routes=1):
 
     curr_row_col = (top_most_hold['row'], top_most_hold['col'])
     
-    finish_radius = get_radius(18)
     possible_finish_holds = list(collection.find({'$and': [{'row': {'$eq': 18}}, {'hold_type': f'{hold_type}'}]}))
     r.shuffle(possible_finish_holds)
     for hold in possible_finish_holds:
@@ -104,16 +92,53 @@ def create_route(hold_type, num_routes=1):
         else:
             print('chossing finish at random')
             random_finish = r.choice(possible_finish_holds)
-    finish_coords = list(random_finish['img_coords'])
-    image_with_circle = draw(image_with_circle, finish_coords, finish_radius, (0,0,255))
 
+    route.append(random_finish)
+    return route
+
+def print_route(holds):
+    def get_radius(row_num):
+        if row_num >= 13:
+            return 100
+        elif row_num >= 7:
+            return 75
+        else:
+            return 50
+        
+    route_length = len(holds) - 1
+    img = cv2.imread("moonBoard.jpg")
+
+    for index, hold in enumerate(holds):
+        hold_coords = hold['img_coords']
+        if index == 0:
+            img = draw(img, hold_coords, get_radius(hold['row']), (0,255,0))
+        elif index == route_length:
+            img = draw(img, hold_coords, get_radius(hold['row']), (0,0,255))
+        else:
+            img = draw(img, hold_coords, get_radius(hold['row']))
+    
     # Display the image
-    cv2.imshow("Image with Circle", image_with_circle)
+    cv2.imshow("Image with Circle", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def alter_route(route, hold_num):
+    hold_index = hold_num - 1
+    
+    if (hold_index == 0):
+        # changes the start hold
+        next_hold = route[hold_index + 1]
+    elif (hold_index == len(route)):
+        # changes the finish hold
+        previous_hold = route[hold_index - 1]
+    else:
+        # changes an intermidiate hold
+        previous_hold = route[hold_index - 1]
+        next_hold = route[hold_index + 1]
+
 def main():
-    create_route('crimp')
+    route = create_route('crimp')
+    print_route(route)
 
 if __name__ == '__main__':
     main()
