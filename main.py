@@ -91,7 +91,6 @@ def create_route(hold_type, num_routes=1) -> list:
             random_finish = hold
             break
         else:
-            print('chossing finish at random')
             random_finish = r.choice(possible_finish_holds)
 
     route.append(random_finish)
@@ -142,112 +141,126 @@ def alter_route(route, hold_num, difficulty, ape_index) -> list:
             # pick a new intermidiate hold, still within reach of other holds
             if (difficulty):
                 # make hold more difficult
+                new_hold_type = curr_hold_type
                 while (True):
+                    temp_curr_row = curr_row
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] + 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         return route
                     
                     row_stack = [curr_row - 1, curr_row + 1]
                     for _ in range(len(row_stack) + 1):
-                        row = list(collection.find({'$and': [{'row': {'$eq': curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
-                        row = r.shuffle(row)
+                        row = list(collection.find({'$and': [{'row': {'$eq': temp_curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
+                        r.shuffle(row)
                         for hold in row:
                             previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                             next_hold_row_col = (next_hold['row'], next_hold['col'])
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index) and within_reach(previous_hold_row_col, (hold['row'], hold['col']), ape_index)):
                                 return hold
-                        curr_row = row_stack.pop()
+                        if (len(row_stack) > 0):
+                            temp_curr_row = row_stack.pop()
                     # didn't find a new hold, repeat proccess
             else:
                 # make hold easier
+                new_hold_type = curr_hold_type
                 while (True):
+                    temp_curr_row = curr_row
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] - 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
                         return route
                     
                     row_stack = [curr_row + 1, curr_row - 1]
                     for _ in range(len(row_stack) + 1):
-                        row = list(collection.find({'$and': [{'row': {'$eq': curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
-                        row = r.shuffle(row)
+                        row = list(collection.find({'$and': [{'row': {'$eq': temp_curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
+                        r.shuffle(row)
                         for hold in row:
                             previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                             next_hold_row_col = (next_hold['row'], next_hold['col'])
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index) and within_reach(previous_hold_row_col, (hold['row'], hold['col']), ape_index)):
                                 return hold
-                        curr_row = row_stack.pop()
+                        if (len(row_stack) > 0):
+                            temp_curr_row = row_stack.pop()
                     # didn't find a new hold, repeat proccess
 
         elif (next_hold):
             # picks a new start hold still within reach of next hold
             if (difficulty):
                 # get harder hold type
+                new_hold_type = curr_hold_type
                 while (True):
                     # loop should either find hold or get key error
+                    temp_curr_row = curr_row
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] + 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         return route
 
                     # this method only works if the row has elected hold_type in it
                     row_stack = [curr_row - 1, curr_row + 1]
                     for _ in range(len(row_stack) + 1):
-                        row = list(collection.find({'$and': [{'row': {'$eq': curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
-                        row = r.shuffle(row)
+                        row = list(collection.find({'$and': [{'row': {'$eq': temp_curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
+                        r.shuffle(row)
                         for hold in row:
                             next_hold_row_col = (curr_row, curr_col)
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index)):
                                 return hold
-                        curr_row = row_stack.pop()
+                        if (len(row_stack) > 0):
+                            temp_curr_row = row_stack.pop()
                     # didn't find a new hold, repeat proccess
             else:
                 # get easier hold type
+                new_hold_type = curr_hold_type
                 while (True):
                     # loop should either find hold or get key error
+                    temp_curr_row = curr_row
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] - 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
                         return route
 
                     # this method only works if the row has elected hold_type in it
                     row_stack = [curr_row + 1, curr_row - 1]
                     for _ in range(len(row_stack) + 1):
-                        row = list(collection.find({'$and': [{'row': {'$eq': curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
-                        row = r.shuffle(row)
+                        row = list(collection.find({'$and': [{'row': {'$eq': temp_curr_row}}, {'hold_type': f'{new_hold_type}'}]}))
+                        r.shuffle(row)
                         for hold in row:
                             next_hold_row_col = (curr_row, curr_col)
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index)):
                                 return hold
-                        curr_row = row_stack.pop()
+                        if (len(row_stack) > 0):
+                            temp_curr_row = row_stack.pop()
                     # didn't find a new hold, repeat proccess                
         
         elif (previous_hold):
             # picks a new finish hold still within reach of the previous hold
             if (difficulty):
                 # pick a harder finish hold
+                new_hold_type = curr_hold_type
                 while (True):
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] + 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         return route
 
                     row = list(collection.find({'$and': [{'row': {'$eq': 18}}, {'hold_type': f'{new_hold_type}'}]}))
-                    row = r.shuffle(row)
+                    r.shuffle(row)
                     for hold in row:
                         previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                         if (within_reach((hold['row'], hold['col']), previous_hold_row_col, ape_index)):
                             return hold
             else:
                 # pick an easier finish hold
+                new_hold_type = curr_hold_type
                 while (True):
                     try:
-                        new_hold_type = categories_by_number[categories_by_name[curr_hold_type] - 1]
+                        new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
                         return route
 
                     row = list(collection.find({'$and': [{'row': {'$eq': 18}}, {'hold_type': f'{new_hold_type}'}]}))
-                    row = r.shuffle(row)
+                    r.shuffle(row)
                     for hold in row:
                         previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                         if (within_reach((hold['row'], hold['col']), previous_hold_row_col, ape_index)):
@@ -265,7 +278,7 @@ def alter_route(route, hold_num, difficulty, ape_index) -> list:
         new_hold = pick_hold(curr_hold, difficulty, ape_index, next_hold=next_hold)
         route.pop(0)
         route.insert(0, new_hold)
-    elif (hold_index == len(route)):
+    elif (hold_num == len(route)):
         # changes the finish hold
         previous_hold = route[hold_index - 1]
         new_hold = pick_hold(curr_hold, difficulty, ape_index, previous_hold=previous_hold)
@@ -276,15 +289,18 @@ def alter_route(route, hold_num, difficulty, ape_index) -> list:
         previous_hold = route[hold_index - 1]
         next_hold = route[hold_index + 1]
         new_hold = pick_hold(curr_hold, difficulty, ape_index, next_hold, previous_hold)
-        route.pop(hold_index - 1)
-        route.insert(hold_index - 1, new_hold)
+        route.pop(hold_index)
+        route.insert(hold_index, new_hold)
+
+    return route
 
 def main():
     routes = [create_route('crimp')]
     img = print_route(routes[-1])
 
-    usr_input = input('Would you like to alter the route? (y/n) ').lower()
+    usr_input = 'y'
     while (usr_input != 'n'):
+        usr_input = input('Would you like to alter the route? (y/n) ').lower()
         if (usr_input == 'y'):
             usr_input = input(f'Starting from the bottom (with 1 as the first hold and {len(routes[-1])} as the last hold), which one would you like to modify? ')
             try:
@@ -297,6 +313,7 @@ def main():
             new_route = alter_route(routes[-1], hold_number, difficulty, APE)
 
             routes.append(new_route)
+            print('showing new image')
             img = print_route(new_route)
     
     usr_input = input('Would you like to save the route? (y/n) ').lower()
