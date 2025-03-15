@@ -48,7 +48,7 @@ def within_reach(curr_row_col, potential_row_col, ape_index, height) -> bool:
     else:
         return True
 
-def create_route(hold_type, num_routes=1) -> list:
+def create_route(hold_type, ape, height, num_routes=1) -> list:
     def pick_next_hold(hold_type, row_num, col_num, ape_index, height):
         # pick next hold based on current row and column
 
@@ -92,7 +92,7 @@ def create_route(hold_type, num_routes=1) -> list:
     # loop through rows picking holds unitl you reach row 17
     while (curr_row <= 17):
         # get next hold
-        next_hold = pick_next_hold(hold_type, curr_row, curr_col, APE, HEIGHT)
+        next_hold = pick_next_hold(hold_type, curr_row, curr_col, ape, height)
         
         if (next_hold):            
             route.append(next_hold)
@@ -116,7 +116,7 @@ def create_route(hold_type, num_routes=1) -> list:
 
     # loop over finish holds and find one that is within reach of previous hold
     for hold in possible_finish_holds:
-        if (within_reach(curr_row_col, (hold['row'], hold['col']), APE, HEIGHT)):
+        if (within_reach(curr_row_col, (hold['row'], hold['col']), ape, height)):
             random_finish = hold
             break
     
@@ -126,7 +126,7 @@ def create_route(hold_type, num_routes=1) -> list:
         r.shuffle(all_finish_holds)
 
         for hold in all_finish_holds:
-            if (within_reach(curr_row_col, (hold['row'], hold['col']), APE, HEIGHT)):
+            if (within_reach(curr_row_col, (hold['row'], hold['col']), ape, height)):
                 random_finish = hold
                 break
         
@@ -484,7 +484,10 @@ def main():
     usr_input = input('would you like to load or create a route? (l/c) ').lower()
 
     if (usr_input == 'c'):
-        routes = [create_route('crimp')]
+        user_ape_index = int(input('What is your ape index (in): '))
+        user_height = int(input('What is your ape height (in): '))
+
+        routes = [create_route('crimp', user_ape_index, user_height)]
         img = print_route(routes[-1])
 
         # user input prompts
@@ -501,7 +504,7 @@ def main():
                     continue
                 
                 difficulty = int(input('Enter 0 to make hold easier, 1 for harder: '))
-                new_route = alter_route(routes[-1], hold_number, difficulty, APE)
+                new_route = alter_route(routes[-1], hold_number, difficulty, user_ape_index, user_height)
 
                 routes.append(new_route)
                 print('showing new image')
