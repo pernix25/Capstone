@@ -210,6 +210,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         # already at max difficulty -> return route
+                        client.close()
                         return route
                     
                     # create a list of future rows to find possible replacement holds
@@ -226,6 +227,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
 
                             # returns new hold if it's within reach of previous and next hold
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index, height) and within_reach(previous_hold_row_col, (hold['row'], hold['col']), ape_index, height)):
+                                client.close()
                                 return hold
                             
                         # new hold hasn't been found -> redo proccess with new row number
@@ -245,7 +247,8 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         # change hold type to an easier one
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
-                        # already at easiest difficulty -> return route 
+                        # already at easiest difficulty -> return route
+                        client.close()
                         return route
                     
                     # create a list of future rows to find possible replacement holds
@@ -262,6 +265,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
 
                             # returns new hold if it's within reach of previous and next hold
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index, height) and within_reach(previous_hold_row_col, (hold['row'], hold['col']), ape_index, height)):
+                                client.close()
                                 return hold
                             
                         # new hold hasn't been found -> redo proccess with new row number
@@ -285,6 +289,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         # already at max difficulty -> return route
+                        client.close()
                         return route
 
                     # create a list of future rows to find possible replacement holds
@@ -299,6 +304,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                             next_hold_row_col = (curr_row, curr_col)
                             # returns new hold if it's within reach of next hold
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index, height)):
+                                client.close()
                                 return hold
                         
                         # new hold hasn't been found -> redo proccess with new row number
@@ -318,7 +324,8 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         # change hold type to an easier one
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
-                        # already at easiest difficulty -> return route 
+                        # already at easiest difficulty -> return route
+                        client.close()
                         return route
 
                     # create a list of future rows to find possible replacement holds
@@ -333,6 +340,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                             next_hold_row_col = (curr_row, curr_col)
                             # returns new hold if it's within reach of next hold
                             if (within_reach((hold['row'], hold['col']), next_hold_row_col, ape_index, height)):
+                                client.close()
                                 return hold
                             
                         # new hold hasn't been found -> redo proccess with new row number
@@ -353,6 +361,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] + 1]
                     except KeyError:
                         # already at max difficulty -> return route
+                        client.close()
                         return route
 
                     # query last row based on new hold type -> shuffle row
@@ -363,6 +372,7 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                         # returns new hold if it's within reach of previous hold
                         if (within_reach((hold['row'], hold['col']), previous_hold_row_col, ape_index, height)):
+                            client.close()
                             return hold
                     # didn't find a new hold, repeat proccess with harder hold type
             else:
@@ -375,7 +385,8 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         # change hold type to an easier one
                         new_hold_type = categories_by_number[categories_by_name[new_hold_type] - 1]
                     except KeyError:
-                        # already at easiest difficulty -> return route 
+                        # already at easiest difficulty -> return route
+                        client.close()
                         return route
 
                     # query last row based on new hold type -> shuffle row
@@ -386,11 +397,13 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
                         previous_hold_row_col = (previous_hold['row'], previous_hold['col'])
                         # returns new hold if it's within reach of previous hold
                         if (within_reach((hold['row'], hold['col']), previous_hold_row_col, ape_index, height)):
+                            client.close()
                             return hold
                     # didn't find a new hold, repeat proccess with easier hold type
 
         else:
             # wrong input raise error
+            client.close()
             raise ValueError
 
     hold_index = hold_num - 1
@@ -418,57 +431,101 @@ def alter_route(route, hold_num, difficulty, ape_index, height) -> list:
 
     return route
 
-def load_route(route_name):
+def load_route(route_name) -> list:
+    # creates a list of holds based on route name
+    route = []
+
     # connect to routes database
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = client["Capstone"]
+    routes_collection = db["routes"]
+    moonBoard_collection = db['moonBoard']
 
-    # get hold id's based on route name
-    pass
+    # get hold id's based on route name form routes database
+    ids = routes_collection.find({'name': route_name})
+    # if route doesn't exist in database return None
+    if not ids:
+        print(f'{route_name} is not a saved route')
+        client.close()
+        return None
+    start_id = ids['start']
+    intermidiate_ids = ids['intermidiates']
+    finish_id = ids['finish']
 
-def upload_route(route_name, holds):
-    # connect to routes database
+    # get the equivalent holds based on ids
+    route.append(moonBoard_collection.find({'_id': start_id}))
+    for i in intermidiate_ids:
+        route.append(moonBoard_collection.find({'_id': i}))
+    route.append(moonBoard_collection.find({'_id': finish_id}))
 
+    client.close()
+    return route
+
+def upload_route(route_name, hold_list) -> None:
     # save holds by name, start, intermidiates, and finsih
-    pass
 
-def prompt_create_route():
-    pass
+    # connect to routes database
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = client["Capstone"]
+    collection = db["routes"]
 
-def prompt_load_route():
-    pass
+    # get start hold, finish hold, and list of intermidiates
+    start = hold_list.pop(0)['_id']
+    finish = hold_list.pop()['_id']
+    intermidiates = [x['_id'] for x in hold_list]
+
+    # insert into routes database
+    collection.insert_one({'name': route_name, 'start': start, 'finish': finish, 'intermidiates': intermidiates})
+
+    # disconnect from db
+    client.close()
 
 def main():
-    # start off by creating a route and an image of the route
-    routes = [create_route('crimp')]
-    img = print_route(routes[-1])
+    usr_input = input('would you like to load or create a route? (l/c) ').lower()
 
-    # user input prompts
-    usr_input = 'y'
-    while (usr_input != 'n'):
-        usr_input = input('Would you like to alter the route? (y/n) ').lower()
+    if (usr_input == 'c'):
+        routes = [create_route('crimp')]
+        img = print_route(routes[-1])
 
+        # user input prompts
+        usr_input = 'y'
+        while (usr_input != 'n'):
+            usr_input = input('Would you like to alter the route? (y/n) ').lower()
+
+            if (usr_input == 'y'):
+                usr_input = input(f'Starting from the bottom (with 1 as the first hold and {len(routes[-1])} as the last hold), which one would you like to modify? ')
+                try:
+                    hold_number = int(usr_input)
+                except ValueError:
+                    print('Please enter a number')
+                    continue
+                
+                difficulty = int(input('Enter 0 to make hold easier, 1 for harder: '))
+                new_route = alter_route(routes[-1], hold_number, difficulty, APE)
+
+                routes.append(new_route)
+                print('showing new image')
+                img = print_route(new_route)
+        
+        name = input('What would you like to name the route: ')
+
+        upload_route(name, routes[-1])
+
+        # saves image to laptop
+        usr_input = input('Would you like to save the route image? (y/n) ').lower()
         if (usr_input == 'y'):
-            usr_input = input(f'Starting from the bottom (with 1 as the first hold and {len(routes[-1])} as the last hold), which one would you like to modify? ')
-            try:
-                hold_number = int(usr_input)
-            except ValueError:
-                print('Please enter a number')
-                continue
-            
-            difficulty = int(input('Enter 0 to make hold easier, 1 for harder: '))
-            new_route = alter_route(routes[-1], hold_number, difficulty, APE)
+            cv2.imwrite(f"{name}.jpg", img)
 
-            routes.append(new_route)
-            print('showing new image')
-            img = print_route(new_route)
-    
-    name = input('What would you like to name the route: ')
+    elif (usr_input == 'l'):
+        name = input('what is the name of the route you wish to load? ')
 
-    upload_route(name, routes[-1])
+        route = load_route(name)
 
-    # saves image to laptop
-    usr_input = input('Would you like to save the route image? (y/n) ').lower()
-    if (usr_input == 'y'):
-        cv2.imwrite(f"{name}.jpg", img)
+        if (route):
+            print_route(route)
+
+    else:
+        print('you chose poorly')
 
 if __name__ == '__main__':
     main()
