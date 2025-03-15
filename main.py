@@ -43,7 +43,7 @@ def within_reach(curr_row_col, potential_row_col, ape_index, height) -> bool:
     col_diff = round(potential_col - curr_col)
 
     # calculate differnece between holds and if its grater than 50% ape index, 115% height return false
-    if ((abs(col_diff * HORIZONTAL) > (ape_index * 0.5)) and (abs(row_diff * VERTICAL) > height * 1.15)):
+    if ((abs(col_diff * HORIZONTAL) > (ape_index * 0.5)) or (abs(row_diff * VERTICAL) > height * 1.15)):
         return False
     else:
         return True
@@ -442,7 +442,7 @@ def load_route(route_name) -> list:
     moonBoard_collection = db['moonBoard']
 
     # get hold id's based on route name form routes database
-    ids = routes_collection.find({'name': route_name})
+    ids = routes_collection.find_one({'name': route_name})
     # if route doesn't exist in database return None
     if not ids:
         print(f'{route_name} is not a saved route')
@@ -453,10 +453,10 @@ def load_route(route_name) -> list:
     finish_id = ids['finish']
 
     # get the equivalent holds based on ids
-    route.append(moonBoard_collection.find({'_id': start_id}))
+    route.append(moonBoard_collection.find_one({'_id': start_id}))
     for i in intermidiate_ids:
-        route.append(moonBoard_collection.find({'_id': i}))
-    route.append(moonBoard_collection.find({'_id': finish_id}))
+        route.append(moonBoard_collection.find_one({'_id': i}))
+    route.append(moonBoard_collection.find_one({'_id': finish_id}))
 
     client.close()
     return route
