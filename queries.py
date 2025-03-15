@@ -6,17 +6,19 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 
 db = client["Capstone"]
 
-collection = db["moonBoard"]
+moon_collection = db["moonBoard"]
+route_collection = db['routes']
 
-#collection.insert_one({'filePath': '12345', 'holdType': 'crimp', 'photoNumber': 1})
+#moon_collection.insert_one({'filePath': '12345', 'holdType': 'crimp', 'photoNumber': 1})
 
-#query = collection.find_one({"filePath": "12345"})
+#query = moon_collection.find_one({"filePath": "12345"})
 """
-query_all = collection.find()
+query_all = moon_collection.find()
 for item in query_all:
     print(item)
 """
-#start_holds = collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': 'crimp'}]})
+#start_holds = moon_collection.find({'$and': [{'row': {'$gte': 5}}, {'row': {'$lte': 7}}, {'hold_type': 'crimp'}]})
 
-#for row in start_holds:
-    #print(row)
+all_routes = route_collection.find()
+for row in all_routes:
+    print(row)
