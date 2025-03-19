@@ -461,36 +461,70 @@ def load_route(route_name) -> list:
     client.close()
     return route
 
-def upload_route(route_name, hold_list) -> None:
-    # save holds by name, start, intermidiates, and finsih
+def upload_route(route_name, hold_list, update=False) -> None:
+    # save holds by name, start, intermidiates, and finsih or updates a previous row based on name
+    """ needs to check to see if name already exists in database """
 
     # connect to routes database
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     db = client["Capstone"]
     collection = db["routes"]
 
-    # get start hold, finish hold, and list of intermidiates
-    start = hold_list.pop(0)['_id']
-    finish = hold_list.pop()['_id']
-    intermidiates = [x['_id'] for x in hold_list]
+    if (update):
+        # deletes previous row based on name
+        collection.delete_one({'name': route_name})
 
-    # insert into routes database
-    collection.insert_one({'name': route_name, 'start': start, 'finish': finish, 'intermidiates': intermidiates})
+        # get start hold, finish hold, and list of intermidiates
+        start = hold_list.pop(0)['_id']
+        finish = hold_list.pop()['_id']
+        intermidiates = [x['_id'] for x in hold_list]
+
+        # insert into routes database
+        collection.insert_one({'name': route_name, 'start': start, 'finish': finish, 'intermidiates': intermidiates})
+    else:
+        # get start hold, finish hold, and list of intermidiates
+        start = hold_list.pop(0)['_id']
+        finish = hold_list.pop()['_id']
+        intermidiates = [x['_id'] for x in hold_list]
+
+        # insert into routes database
+        collection.insert_one({'name': route_name, 'start': start, 'finish': finish, 'intermidiates': intermidiates})
 
     # disconnect from db
     client.close()
 
 def main():
-    usr_input = input('would you like to load or create a route? (l/c) ').lower()
+    usr_input = input('Would you like to load or create a route? (l/c) ').lower()
 
+    # creates a route
     if (usr_input == 'c'):
         user_ape_index = int(input('What is your ape index (in): '))
         user_height = int(input('What is your ape height (in): '))
 
-        routes = [create_route('crimp', user_ape_index, user_height)]
+        print('What would you like to train: \n1: jugs \n2: edges \n3: pinches \n4: crimps \n5: small pinches \n6:small crimps')
+
+        usr_choice = int(input('Please enter the number corresponding to the hold you want to train: '))
+
+        if (usr_choice == 1):
+            usr_hold_type = 'jug'
+        elif (usr_choice == 2):
+            usr_hold_type = 'edge'
+        elif (usr_choice == 3):
+            usr_hold_type = 'pinch'
+        elif (usr_choice == 4):
+            usr_hold_type = 'crimp'
+        elif (usr_choice == 5):
+            usr_hold_type = 'small pinch'
+        elif (usr_choice == 6):
+            usr_hold_type = 'small crimp'
+        else:
+            print('You chose poorly!')
+            return
+
+        routes = [create_route(usr_hold_type, user_ape_index, user_height)]
         img = print_route(routes[-1])
 
-        # user input prompts
+        # alter route block
         usr_input = 'y'
         while (usr_input != 'n'):
             usr_input = input('Would you like to alter the route? (y/n) ').lower()
@@ -507,7 +541,7 @@ def main():
                 new_route = alter_route(routes[-1], hold_number, difficulty, user_ape_index, user_height)
 
                 routes.append(new_route)
-                print('showing new image')
+                print('Showing new image')
                 img = print_route(new_route)
         
         name = input('What would you like to name the route: ')
@@ -519,13 +553,48 @@ def main():
         if (usr_input == 'y'):
             cv2.imwrite(f"{name}.jpg", img)
 
+    # loads previously created route
     elif (usr_input == 'l'):
-        name = input('what is the name of the route you wish to load? ')
+        name = input('What is the name of the route you wish to load? ')
 
         route = load_route(name)
 
         if (route):
             print_route(route)
+        
+        # alter route block
+        usr_input = 'y'
+        while (usr_input != 'n'):
+            usr_input = input('Would you like to alter the route? (y/n) ').lower()
+
+            if (usr_input == 'y'):
+                usr_input = input(f'Starting from the bottom (with 1 as the first hold and {len(route)} as the last hold), which one would you like to modify? ')
+                try:
+                    hold_number = int(usr_input)
+                except ValueError:
+                    print('Please enter a number')
+                    continue
+                
+                difficulty = int(input('Enter 0 to make hold easier, 1 for harder: '))
+                user_ape_index = int(input('Your ape index in inches: '))
+                user_height = int(input('Your height in inches: '))
+
+                new_route = alter_route(route, hold_number, difficulty, user_ape_index, user_height)
+
+                print('Showing new image')
+                img = print_route(new_route)
+
+                # update route block
+                usr_input = input('Would you like to update the saved route (y/n): ').lower()
+                if (usr_input == 'y'):
+                    upload_route(name, new_route, update=True)
+                    print('Route was updated')
+                    break
+                elif (usr_input == 'n'):
+                    print('Route was left unchanged')
+                    usr_input = 'y'
+                else:
+                    print('You chose poorly')
 
     else:
         print('you chose poorly')
