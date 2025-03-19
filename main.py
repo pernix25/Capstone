@@ -32,6 +32,11 @@ def query() -> None:
     for item in data:
         print(item)
 
+class ReachError(Exception):
+    #Custom exception for when no climbing hold is within vertical reach
+    def __init__(self, message="There doesn't exist a hold within vertical reach."):
+        super().__init__(message)
+
 def within_reach(curr_row_col, potential_row_col, ape_index, height) -> bool:
     # determines weather a hold is within reach based on 50% of ape index and 115% of height
     curr_row = curr_row_col[0]
@@ -42,11 +47,25 @@ def within_reach(curr_row_col, potential_row_col, ape_index, height) -> bool:
     row_diff = round(potential_row - curr_row)
     col_diff = round(potential_col - curr_col)
 
-    # calculate differnece between holds and if its grater than 50% ape index, 115% height return false
-    if ((abs(col_diff * HORIZONTAL) > (ape_index * 0.5)) or (abs(row_diff * VERTICAL) > height * 1.15)):
-        return False
+    # calculate differnece between holds and if its grater than 50% ape index, 45% height return false
+    if ((abs(col_diff * HORIZONTAL) > (ape_index * 0.5)) or (abs(row_diff * VERTICAL) > height * 0.45)):
+        if (abs(row_diff * VERTICAL) > height * 0.45):
+            raise ReachError
+        else:
+            return False
     else:
         return True
+
+def alter_hold_type(curr_type) -> str:
+    # create hold dicts based on categoery and dificulty (0 = easy, 5 = hard)
+    categories_by_name = {'jug': 0, 'edge': 1, 'pinch': 2, 'crimp': 3, 'small pinch': 4, 'small crimp': 5}
+    categories_by_number = {0: 'jug', 1: 'edge', 2: 'pinch', 3: 'crimp', 4: 'small pinch', 5: 'small crimp'}
+
+    curr_cat_num = categories_by_name[curr_type]
+    if (curr_cat_num == 0):
+        return 'edge'
+    else:
+        return categories_by_number[curr_cat_num - 1]
 
 def create_route(hold_type, ape, height, num_routes=1) -> list:
     def pick_next_hold(hold_type, row_num, col_num, ape_index, height):
@@ -64,13 +83,16 @@ def create_route(hold_type, ape, height, num_routes=1) -> list:
             if (possible_holds):
                 r.shuffle(possible_holds)
                 for chosen_hold in possible_holds:
-                    if (within_reach((row_num, col_num), (chosen_hold['row'], chosen_hold['col']), ape_index, height)):
-                        return chosen_hold
+                    try:
+                        if (within_reach((row_num, col_num), (chosen_hold['row'], chosen_hold['col']), ape_index, height)):
+                            return chosen_hold
+                    except ReachError:
+                        raise ReachError
             next_row += 1
 
         # did not find hold -> return False
         return False
-    
+
     # connect to database
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     db = client["Capstone"]
@@ -92,7 +114,12 @@ def create_route(hold_type, ape, height, num_routes=1) -> list:
     # loop through rows picking holds unitl you reach row 17
     while (curr_row <= 17):
         # get next hold
-        next_hold = pick_next_hold(hold_type, curr_row, curr_col, ape, height)
+        try:
+            next_hold = pick_next_hold(hold_type, curr_row, curr_col, ape, height)
+        # theres no hold within vertical reach -> select hold with new hold type
+        except ReachError:
+            temp_hold_type = alter_hold_type(hold_type)
+            next_hold = next_hold = pick_next_hold(temp_hold_type, curr_row, curr_col, ape, height)
         
         if (next_hold):            
             route.append(next_hold)
@@ -549,7 +576,7 @@ def main():
         upload_route(name, routes[-1])
 
         # saves image to laptop
-        usr_input = input('Would you like to save the route image? (y/n) ').lower()
+        usr_input = input('Would you like to save the route image to computer? (y/n) ').lower()
         if (usr_input == 'y'):
             cv2.imwrite(f"{name}.jpg", img)
 
